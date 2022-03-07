@@ -8,7 +8,7 @@ const style = `
 
       height: 100vh;
       width:100%;
-      padding-bottom: 10%;
+      // padding-bottom: 10%;
     }
 
     h1{
@@ -87,7 +87,7 @@ const Home = () => {
       {/* 로그인 섹션  */}
       <section className="login-section">
         <div className="input_account"><div className="idpassId">id : </div><input placeholder="id"/></div>
-        <div className="input_account"><div className="idpassId">pass : </div><input placeholder="password"/></div>
+        <div className="input_account"><div className="idpassId">pass : </div><input type="password" placeholder="password"/></div>
         <section className="social-login">{socialLogin()}</section>
         <Link href="/list"><button>move to list</button></Link>
       </section>
