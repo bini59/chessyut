@@ -35,6 +35,9 @@ table th{
 table td{
     border-bottom: 1px solid #dee2e6;
 }
+tbody tr:hover{
+    background-color: #f1f1f1;
+}
 
 .container{
     width: 100%;
@@ -70,10 +73,6 @@ div.container{
 
 
 const list = ()=>{
-
-
-
-
     const navbar = (
         <div className="Nav-container">
             <nav className="nav container">
@@ -100,11 +99,9 @@ const list = ()=>{
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>체스 윷놀이 테스트</td>
-                            <td>3/4</td>
-                        </tr>
+                        <Link href="/game">
+                            <tr><td>1</td><td>체스 윷놀이 테스트</td><td>3/4</td></tr>
+                        </Link>
                     </tbody>
                 </table>
             </div>
