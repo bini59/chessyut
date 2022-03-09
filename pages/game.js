@@ -44,6 +44,19 @@ const style = `
         font-size: 3rem;
     }
 
+    .board{
+        border : 1px solid #000;
+        width : 10vw;
+        height: 10vh;
+        margin-left : auto;
+        margin-right: auto;
+    }
+    
+    .chess-board { border-spacing: 0; border-collapse: collapse; }
+    .chess-board th { padding: .5em; }
+    .chess-board td { border: 1px solid; width: 2em; height: 2em; }
+    .chess-board .light { background: #eee; }
+    .chess-board .dark { background: #000; }
 `
 
 const User = ()=>{
@@ -86,6 +99,104 @@ const User = ()=>{
     )
 }
 
+const Board = ()=>{
+    return (
+        <section className="board">
+            <table class="chess-board">
+            <tbody>
+                <tr>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                </tr>
+                <tr>
+                
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                </tr>
+                <tr>
+                
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                </tr>
+                <tr>
+                
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                </tr>
+                <tr>
+                
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                </tr>
+                <tr>
+                
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                </tr>
+                <tr>
+                
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                </tr>
+                <tr>
+                
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                    <td class="dark"></td>
+                    <td class="light"></td>
+                </tr>
+            </tbody>
+        </table>
+        </section>
+    );
+}
+
 const Game = ()=>{
     const [time, setTime] = useState(0);
 
@@ -95,6 +206,7 @@ const Game = ()=>{
             <Timer time={time} settime={(t)=>{setTime(t)}}/>
             <User/>
 
+            <Board />
             {/* test timer button */}
             {/* <button onClick={()=>{setTime(10)}}>tt</button>
             <button onClick={()=>{setTime(5)}}>tt</button> */}
