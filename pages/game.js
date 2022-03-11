@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import Timer from "./component/timer";
@@ -52,6 +52,14 @@ const style = `
         margin-left : auto;
         margin-right: auto;
     }
+    .piece{
+        cursor:pointer;
+    }
+    .dot{
+        cursor:pointer;
+        width: 1.5vw;
+        height: 1.5vw;
+    }
     
     .chess-board { border: 1px solid; border-spacing: 0; border-collapse: collapse; }
     .chess-board td { width: 3.75vw; height: 3.75vw; position:relative; text-align: center;}
@@ -104,24 +112,76 @@ const User = ()=>{
 // (!(p%2)||(q%2))&&(!(q%2)||(p%2))
 
 const Board = (props)=>{
-    let B = [
-        [0, 4, 4, 4, 4, 4, 4, 0],
-        [4, 1, 1, 1, 1, 1, 1, 4],
-        [4, 1, 1, 0, 0, 0, 1, 4],
-        [4, 1, 0, 1, 0, 0, 1, 4],
-        [4, 1, 0, 0, 1, 0, 1, 4],
-        [4, 1, 0, 0, 0, 1, 1, 4],
-        [4, 2, 0, 0, 0, 0, 3, 4],
-    ]
+    const [B, setB] = useState([
+        [0, 5, 5, 5, 5, 5, 5, 0],
+        [5, 1, 1, 1, 1, 1, 1, 5],
+        [5, 1, 1, 0, 0, 0, 1, 5],
+        [5, 1, 0, 1, 0, 0, 1, 5],
+        [5, 1, 0, 0, 1, 0, 1, 5],
+        [5, 1, 0, 0, 0, 1, 1, 5],
+        [5, 2, 0, 0, 0, 0, 3, 5],
+    ])
+    const pics = props.picsInfo.pieces;
+    // 콘솔 출력용
+    // useEffect(()=>{
+    //     console.log(pics)
+    // })
+    const [select, setSel] = useState([0,0])
 
-    const pics = props.pics;
+    const click = (e, n)=>{
+        console.log(n)
+        var i = n[0]-(n[1] < 6 ? props.dice : -props.dice);
+        var j = n[1]
+
+        if (i < 1){
+            j += 1-i
+            i = 1
+        }
+        if(j > 6){
+            i -= 6-j
+            j = 6
+        }
+        var _B = [...B]
+        if(select[0] == n[0] && select[1] == n[1]){
+            _B[i][j] = 1
+            setSel([0, 0])
+        }
+        else{
+            _B[i][j] = 4
+            setSel([n[0], n[1]])
+        }
+        setB(_B)
+    }
+
+    const movePcs = (loc)=>{
+        console.log(loc)
+        let ps = pics[select[0]][select[1]]
+        let piece = [...pics]
+        piece[select[0]][select[1]]= 0
+        piece[loc[0]][loc[1]] = ps
+
+        props.setPics({
+            ...props.pieceInfo,
+            pieces : piece
+        })
+        click("", select)
+        setSel([0, 0])
+
+    }
+
+    
 
     let Board = B.map((R, ri)=>{
         let row = R.map((I, iI)=>{
             return(
-                <td key={ri*10+iI} className={((!(ri%2)||(iI%2))&&(!(iI%2)||(ri%2)) ? "light": "dark")+(I>0 ? ((I < 4) ? " use-normal": " use-knight")  : " not-use")} >
-                    {(pics[ri][iI] != 0) ? <Image src={"/pieces/"+(pics[ri][iI])+".png"} layout="fill" /> : "" }
+                <td 
+                    key={ri*10+iI} 
+                    className={((!(ri%2)||(iI%2))&&(!(iI%2)||(ri%2)) ? "light": "dark")+(I>0 ? ((I < 5) ? " use-normal": " use-knight")  : " not-use")} 
+                    onClick={(I == 4 ? ()=>{movePcs([ri, iI])}: ()=>{})}
+                    style={(I == 4 ? {"cursor" : "pointer"} : {})}
+                >                    {(pics[ri][iI] != 0) ? <Image onClick={(e)=>{click(e, [ri, iI])}} className="piece" src={"/pieces/"+(pics[ri][iI])+".png"} layout="fill" /> : "" }
                     {(I == 3 ? "End" : (I == 2 ? "start" : ""))}
+                    {(I == 4 ? <Image className="dot" src={"/dot.svg"} width="20" height="20" /> : "")}
                 </td>
             )
         })
@@ -145,23 +205,31 @@ const Board = (props)=>{
 const Game = ()=>{
     const [time, setTime] = useState(0);
 
-    const [peices, setPics] = useState([
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, "bB", 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ])
+    const [diceN, setDice] = useState(3)
+    const [pieceInfo, setPics] = useState({
+        meNotArrive : ["bK", "bB", "bN", "bP", "bP"],
+        myArrive : [],
+        oppNotArrive : ["wK", "wB", "wN", "wP", "wP"],
+        oppArrive : [],
+        pieces : [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, "bk", 0, 0, 0, 0, 0, 0]
+        ]
+    })
     
+
 
     return (
         <>
             <Timer time={time} settime={(t)=>{setTime(t)}}/>
             <User/>
-
-            <Board pics={peices}/>
+            
+            <Board picsInfo={pieceInfo} setPics={(e)=>setPics(e)}dice={diceN}/>
             {/* test timer button */}
             {/* <button onClick={()=>{setTime(10)}}>tt</button>
             <button onClick={()=>{setTime(5)}}>tt</button> */}
