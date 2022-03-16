@@ -60,13 +60,56 @@ const style = `
         width: 1.5vw;
         height: 1.5vw;
     }
-    
-    .chess-board { border: 1px solid; border-spacing: 0; border-collapse: collapse; }
-    .chess-board td { width: 3.75vw; height: 3.75vw; position:relative; text-align: center;}
+
+    .dice{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    // .chess-board { border: 1px solid; border-spacing: 0; border-collapse: seperate; }
+    .chess-board td { width: 3.75vw; height: 3.75vw; position:relative; text-align: center; font-size:1vw;}
     .chess-board .light { background: #f0d9b5; }
     .chess-board .dark { background: #b58863; }    
-    .chess-board .use-normal{ border-radius : 20px; border: 3px solid #8f2700; }
+    .chess-board .use-normal{ border-radius : 10px; border: 3px solid #8f2700; }
     .chess-board .use-knight{ border: 3px solid #8f2700; }
+
+    .pieceWait{
+        display:block;
+        width: 2vw;
+        height: 2vw;
+        margin-left:2%;
+        margin-right:2%;
+    }
+    .myPiece{
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 18vw;
+        height: 25vw;
+        margin-left:auto;
+        margin-right:auto;
+        
+    }
+    .piece-box{
+        display:flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        border:1px solid;
+        width: 80%;
+        height: 20%;
+        margin-bottom: 2%;
+    }
+
+    .Game{
+        display:flex;
+        align-items:center;
+    }
 `
 
 const User = ()=>{
@@ -121,55 +164,64 @@ const Board = (props)=>{
         [5, 1, 0, 0, 0, 1, 1, 5],
         [5, 2, 0, 0, 0, 0, 3, 5],
     ])
-    const pics = props.picsInfo.pieces;
     // 콘솔 출력용
     // useEffect(()=>{
-    //     console.log(pics)
+    //     console.log(props)
     // })
-    const [select, setSel] = useState([0,0])
 
-    const click = (e, n)=>{
-        console.log(n)
-        var i = n[0]-(n[1] < 6 ? props.dice : -props.dice);
-        var j = n[1]
 
-        if (i < 1){
-            j += 1-i
-            i = 1
+    const [target, setTarget] = useState("")
+    const piecesInfo = props.picsInfo;
+    const move = (loc)=>{
+        let info = {...piecesInfo};
+        for(var i = 0; i < 7; i++)
+            for(var j = 0; j < 8; j++)
+                if(info.pieces[i][j] == target) info.pieces[i][j] = 0;
+
+        (loc[0] == 6 && loc[1] == 6) ? info.myArrive.push(target) : info.pieces[loc[0]][loc[1]] = target;
+        if(info.myNotArrive.indexOf(target) != -1){
+            info.myNotArrive.splice(info.myNotArrive.indexOf(target), 1);
         }
-        if(j > 6){
-            i -= 6-j
-            j = 6
-        }
-        var _B = [...B]
-        if(select[0] == n[0] && select[1] == n[1]){
-            _B[i][j] = 1
-            setSel([0, 0])
-        }
-        else{
-            _B[i][j] = 4
-            setSel([n[0], n[1]])
-        }
-        setB(_B)
+
+
+        // 이 부분은 서버로 보내서 처리할것. 
+        // 서버로 보낸후 받아오는걸로 setPics..
+        props.setPics(info);
+        Click("moved", target, loc);
     }
+    const Click = (event, selPics, loc)=>{
+        let _b = [...B];
+        if(event == "moved"){
+            _b[loc[0]][loc[1]] = 1;
+            setB(_b);
+            setTarget("");
+            return;
+        }
+        const dice = props.dice;
 
-    const movePcs = (loc)=>{
-        console.log(loc)
-        let ps = pics[select[0]][select[1]]
-        let piece = [...pics]
-        piece[select[0]][select[1]]= 0
-        piece[loc[0]][loc[1]] = ps
+        // console.log("주사위값 확인 : "+dice);
 
-        props.setPics({
-            ...props.pieceInfo,
-            pieces : piece
-        })
-        click("", select)
-        setSel([0, 0])
 
+        if(loc[0] == loc[1]){loc[0] = loc[1] = (dice+loc[0] > 6 ? 6 : loc[0]+dice)}
+        else {loc[0] -= loc[1] < 6 ? dice : -dice;}
+        if(loc[0] < 1) {loc[1] += (1-loc[0]); loc[0] = 1;}
+        if(loc[1] > 6){ loc[0] -= 6-loc[1]; loc[1] = 6;}
+        if(loc[0] > 6){ loc[0] = 6;}
+
+        // console.log("최종 location 좌표 : "+ loc)
+
+
+        if(selPics == target){
+            // console.log("test\n" + _b[4]);
+            _b[loc[0]][loc[1]] = 1;
+            setB(_b);
+            setTarget("");
+            return;
+        }
+        _b[loc[0]][loc[1]] = 4
+        setTarget(selPics);
+        setB(_b);
     }
-
-    
 
     let Board = B.map((R, ri)=>{
         let row = R.map((I, iI)=>{
@@ -177,9 +229,10 @@ const Board = (props)=>{
                 <td 
                     key={ri*10+iI} 
                     className={((!(ri%2)||(iI%2))&&(!(iI%2)||(ri%2)) ? "light": "dark")+(I>0 ? ((I < 5) ? " use-normal": " use-knight")  : " not-use")} 
-                    onClick={(I == 4 ? ()=>{movePcs([ri, iI])}: ()=>{})}
+                    onClick={(I == 4 ? ()=>{move([ri, iI])}: ()=>{})}
                     style={(I == 4 ? {"cursor" : "pointer"} : {})}
-                >                    {(pics[ri][iI] != 0) ? <Image onClick={(e)=>{click(e, [ri, iI])}} className="piece" src={"/pieces/"+(pics[ri][iI])+".png"} layout="fill" /> : "" }
+                >                    
+                    {(piecesInfo.pieces[ri][iI] != 0) ? <Image onClick={(e)=>{Click(e,piecesInfo.pieces[ri][iI], [ri, iI])}} className="piece" src={"/pieces/"+(piecesInfo.pieces[ri][iI])+".png"} layout="fill" /> : "" }
                     {(I == 3 ? "End" : (I == 2 ? "start" : ""))}
                     {(I == 4 ? <Image className="dot" src={"/dot.svg"} width="20" height="20" /> : "")}
                 </td>
@@ -193,21 +246,64 @@ const Board = (props)=>{
 
 
     return (
-        <section className="board">
-            <table className="chess-board">
-                <tbody>{Board}</tbody>
-            </table>
-        </section>
+
+        <div className="Game">
+            <Piece click={(target, loc)=>{Click("new", target, loc)}}dice={props.dice} piece={[piecesInfo.myNotArrive, piecesInfo.myArrive]}/>
+            <section className="board">
+                <table className="chess-board">
+                    <tbody>{Board}</tbody>
+                </table>
+            </section>
+            <Piece click={(target, loc)=>{Click("new", target, loc)}}dice={props.dice} piece={[piecesInfo.oppNotArrive, piecesInfo.oppArrive]}/>
+        </div>
+        
     );
 }
 
+const Dice = (props)=>{
+    // 서버로 보내야함.
+    // 주사위 결과값
+    return(
+        <section className="dice">
+            <div>주사위 결과 값 : {props.dice}</div>
+            <button onClick={()=>{props.setDice(Math.floor(Math.random()*4)+1);}}>주사위 굴리기</button>
+        </section>
+    )
+}
+
+const Piece = (props)=>{
+    // console.log(props)
+    const notArr = props.piece[0].map((p, i)=>{
+        return(
+            <div className="pieceWait" key={"mypice"+i}>
+                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}}src={"/pieces/"+p+".png"} width="50" height="50" />
+            </div>
+        )
+    });
+    const Arr = props.piece[1].map((p, i)=>{
+        return(
+            <div className="pieceWait" key={"mypice"+i}>
+                <Image className="piece" src={"/pieces/"+p+".png"} width="50" height="50" />
+            </div>
+        )
+    });
+    
+    return(
+        <section className="myPiece">
+            <div>대기말</div>
+            <section className="piece-box notArr">{notArr}</section>
+            <div>도착말</div>
+            <section className="piece-box Arr">{Arr}</section>
+        </section>
+    )
+}
 
 const Game = ()=>{
     const [time, setTime] = useState(0);
 
     const [diceN, setDice] = useState(3)
     const [pieceInfo, setPics] = useState({
-        meNotArrive : ["bK", "bB", "bN", "bP", "bP"],
+        myNotArrive : ["bK", "bB", "bN", "bP", "bP"],
         myArrive : [],
         oppNotArrive : ["wK", "wB", "wN", "wP", "wP"],
         oppArrive : [],
@@ -218,10 +314,9 @@ const Game = ()=>{
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, "bk", 0, 0, 0, 0, 0, 0]
+            [0, 0, 0, 0, 0, 0, 0, 0]
         ]
     })
-    
 
 
     return (
@@ -229,7 +324,10 @@ const Game = ()=>{
             <Timer time={time} settime={(t)=>{setTime(t)}}/>
             <User/>
             
-            <Board picsInfo={pieceInfo} setPics={(e)=>setPics(e)}dice={diceN}/>
+            <Board picsInfo={pieceInfo} setPics={(e)=>setPics(e)} dice={diceN}/>
+
+            <Dice dice={diceN} setDice={(t)=>{setDice(t)}}/>
+            
             {/* test timer button */}
             {/* <button onClick={()=>{setTime(10)}}>tt</button>
             <button onClick={()=>{setTime(5)}}>tt</button> */}
