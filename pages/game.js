@@ -276,7 +276,7 @@ const Piece = (props)=>{
     const notArr = props.piece[0].map((p, i)=>{
         return(
             <div className="pieceWait" key={"mypice"+i}>
-                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}}src={"/pieces/"+p+".png"} width="50" height="50" />
+                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}} src={"/pieces/"+p+".png"} width="50" height="50" />
             </div>
         )
     });
@@ -303,9 +303,9 @@ const Game = ()=>{
 
     const [diceN, setDice] = useState(3)
     const [pieceInfo, setPics] = useState({
-        myNotArrive : ["bK", "bB", "bN", "bP", "bP"],
+        myNotArrive : ["bK", "bB", "bN", "bP", "bP1"],
         myArrive : [],
-        oppNotArrive : ["wK", "wB", "wN", "wP", "wP"],
+        oppNotArrive : ["wK", "wB", "wN", "wP", "wP1"],
         oppArrive : [],
         pieces : [
             [0, 0, 0, 0, 0, 0, 0, 0],
