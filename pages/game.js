@@ -46,19 +46,19 @@ const style = `
     }
 
     .board{
+        display:flex;
         margin-top : 10vh;
         width : 30vw;
-        height: 30vw;
+        height: 28.25vw;
         margin-left : auto;
         margin-right: auto;
+        justify-content: center;
     }
-    .piece{
-        cursor:pointer;
-    }
+
     .dot{
         cursor:pointer;
-        width: 1.5vw;
-        height: 1.5vw;
+        width: 100%;
+
     }
 
     .dice{
@@ -81,6 +81,15 @@ const style = `
         height: 2vw;
         margin-left:2%;
         margin-right:2%;
+    }
+    .pieceWait span{
+        position:inherit !important;
+    }
+    .piece{
+        position:inherit !important;
+        width:100% !important;
+        height:100% !important;
+        cursor:pointer;
     }
     .myPiece{
         display:flex;
@@ -109,6 +118,37 @@ const style = `
     .Game{
         display:flex;
         align-items:center;
+    }
+
+    @media (max-width:1500px){
+        .Game{
+            flex-wrap: wrap;
+        }
+        .Game section:first-child{
+            order:2;
+        }
+        .Game section:nth-child(2){
+            order:1;
+        }
+        .Game section:last-child{
+            order:3;
+        }
+        .board{
+            width: 100%;
+            height:56vw;
+        }
+        .chess-board td{
+            width:7.5vw;
+            height:7.5vw;
+        }
+        .myPiece{
+            width: 40vw;
+            height: 30vw;
+        }
+        .pieceWait{
+            width:5vw;
+            height:5vw;
+        }
     }
 `
 
@@ -273,10 +313,11 @@ const Dice = (props)=>{
 
 const Piece = (props)=>{
     // console.log(props)
+
     const notArr = props.piece[0].map((p, i)=>{
         return(
             <div className="pieceWait" key={"mypice"+i}>
-                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}} src={"/pieces/"+p+".png"} width="50" height="50" />
+                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}} src={"/pieces/"+p+".png"} layout="fill"style={{"width":"null", "height":"5vw","resizeMode":"cover"}} />
             </div>
         )
     });
