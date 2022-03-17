@@ -1,9 +1,15 @@
 import Link from "next/link"
-
+import { useState } from "react";
 
 const style = `
 .Nav-container{
     background-color: #fff;
+}
+
+.create-btn-wrapper{
+    width: 100%;
+    display:flex;
+    justify-content: flex-end;
 }
 
 nav{
@@ -42,37 +48,157 @@ tbody tr:hover{
 .container{
     width: 100%;
     margin: 0 auto 0 auto;
+
 }
 
 div.container{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
     padding-top: 30px;
 }
+
+
+.create-window{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    position: fixed;
+    top: 200px;
+    width: 60%;
+    height: 170px;
+    background-color: #fff;
+    border-radius: 15px;
+}
+.create-btn{
+    float: right;
+}
+.create-input-title{
+    background-color: #c9c9c9;
+    text-align: center;
+    border-radius : 6px;
+    border-style: solid;
+    bodrer-width: 1px;
+    bodrer-color: rgb(184, 184, 184);
+    margin-left: 2%;
+
+    width: 90%;
+    font-size:20px;
+}
+.create-window-det-btn{
+    margin-right: 10px;
+}
+.create-window div{
+    display:flex;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding-left: 4%;
+    padding-right: 4%;
+}
+.input-title-wrapper{
+    align-items: center;
+    font-size:20px;
+}
+.det-btn-wrapper{
+    
+    justify-content: flex-end;
+}
+.det-btn-wrapper button{
+    width: 75px;
+}
+
+@media (max-width: 1200px){
+    .input-title-wrapper, .create-input-title{
+        font-size: 18px;
+        margin-left: 1%;
+    }
+    .create-input-title{
+        width: 85%;
+    }
+}
+@media (max-width: 768px) {
+    .input-title-wrapper, .create-input-title{
+        font-size: 17px;
+    }
+    .create-input-title{
+        width: 83%;
+    }
+}
+// @media (max-width)
 
 @media (min-width: 576px) {
     .container{
         max-width: 540px;
+    }
+    .create-window{
+        max-width: 378px;
     }
 }
 @media (min-width: 768px) {
     .container{
         max-width: 720px;
     }
+    .create-window{
+        max-width: 504px;
+    }
 }
 @media (min-width: 992px) {
     .container{
         max-width: 960px;
+    }
+    .create-window{
+        max-width: 692px;
     }
 }
 @media (min-width: 1200px) {
     .container{
         max-width: 1040px;
     }
+    .create-window{
+        max-width: 728px;
+    }
 }
     
 `
 
+const Create = (props)=>{
 
-const list = ()=>{
+    // 방 제목 결정해서 서버로 보내는 코드 필요
+    // 이 createroom이 서버로 보내는 코드가 될것.
+    const createRoom = ()=>{
+        var title = document.getElementById("roominput").value;
+        let rooms = [...props.room]
+        rooms.push({
+            title: title,
+            np: 1
+        })
+        props.setRoom(rooms);
+
+        props.removeWindow();
+    }
+
+    return(
+        <section className="create-window">
+            <div>
+                방 생성하기
+            </div>
+            <div className="input-title-wrapper">
+                <span>제목 : </span>
+                <input id="roominput" className="create-input-title" placeholder="제목을 입력해주세요" onKeyDown={(e)=>{if(e.key==="Enter"){createRoom()}}}/>
+            </div>
+            <div className="det-btn-wrapper">
+                <button className="create-window-det-btn" onClick={createRoom}>만들기</button>
+                <button className="create-window-det-btn" onClick={()=>{props.removeWindow()}}>취소</button>
+            </div>
+        </section>
+    );
+}
+
+
+const List = ()=>{
+    const [showCreate, setCreate] = useState(false)
+    const [roomlist, setRoomlist] = useState([{title: "체스 윷놀이 테스트", np:2}])
+
     const navbar = (
         <div className="Nav-container">
             <nav className="nav container">
@@ -84,12 +210,33 @@ const list = ()=>{
                 <div className="profile">nickname</div>
             </nav>
         </div>
-    )   
+    )
+
+    // 서버로 부터 방 정보 갱신 받기.
+
+    const lists = roomlist.map((r, i)=>{
+        return(
+            <Link href="/game" key={"room"+i}>
+                <tr><td>{i+1}</td><td>{r.title}</td><td>{r.np}/2</td></tr>
+            </Link>
+        )
+    })
 
     return(
         <>
             {navbar}
             <div className="container">
+                {/* 
+                    test용 코드로 setRoomlist 넣어줌
+                    위쪽 서버로 부터 방 정보 갱신받기 하면,
+                    setRoomlist 삭제할것.
+
+                 */}
+                {showCreate ? <Create room={roomlist} setRoom={(e)=>{setRoomlist(e)}}removeWindow={()=>{setCreate(false)}} /> : ""}
+                <div className="create-btn-wrapper">
+                    <button className="create-btn" onClick={()=>{setCreate(!showCreate)}}>방 생성하기</button>
+                </div>
+                
                 <table>
                     <thead>
                         <tr>
@@ -98,11 +245,7 @@ const list = ()=>{
                             <th className="third-item" style={{width: "26%"}}>사람</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <Link href="/game">
-                            <tr><td>1</td><td>체스 윷놀이 테스트</td><td>3/4</td></tr>
-                        </Link>
-                    </tbody>
+                    <tbody>{lists}</tbody>
                 </table>
             </div>
 
@@ -113,4 +256,4 @@ const list = ()=>{
 
 
 
-export default list;
+export default List;
