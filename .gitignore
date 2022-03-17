@@ -33,3 +33,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+
+# express
+/server/node_modules

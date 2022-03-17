@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const style = `
 .Nav-container{
@@ -161,18 +161,32 @@ div.container{
     
 `
 
+const fetchRoom = (room, set)=>{
+    const recipeUrl = "http://192.168.1.21:3001/room";
+    const requestMetadata = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(room)
+    };
+        //rendering Main
+    fetch(recipeUrl, requestMetadata)
+    .then(res => res.json())
+    .then(json => set(JSON.parse(json)))
+
+}
+
+
 const Create = (props)=>{
 
     // 방 제목 결정해서 서버로 보내는 코드 필요
     // 이 createroom이 서버로 보내는 코드가 될것.
+    // 했음
     const createRoom = ()=>{
         var title = document.getElementById("roominput").value;
-        let rooms = [...props.room]
-        rooms.push({
-            title: title,
-            np: 1
-        })
-        props.setRoom(rooms);
+        fetchRoom({title: title, np: 1},props.setRoom);
 
         props.removeWindow();
     }
@@ -195,9 +209,12 @@ const Create = (props)=>{
 }
 
 
+
 const List = ()=>{
     const [showCreate, setCreate] = useState(false)
-    const [roomlist, setRoomlist] = useState([{title: "체스 윷놀이 테스트", np:2}])
+    const [roomlist, setRoomlist] = useState([])
+
+    useEffect(()=>{fetchRoom({}, setRoomlist);}, [])
 
     const navbar = (
         <div className="Nav-container">
@@ -212,7 +229,6 @@ const List = ()=>{
         </div>
     )
 
-    // 서버로 부터 방 정보 갱신 받기.
 
     const lists = roomlist.map((r, i)=>{
         return(
