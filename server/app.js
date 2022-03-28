@@ -3,9 +3,10 @@ const express = require('express');
 const cors = require("cors");
 const path = require('path');
 const logger = require('morgan');
-const io = require("socket.io");
+const io = require("socket.io")
 
 const roomRouter = require("./routes/room");
+const socketHandler = require("./routes/game");
 
 const app = express();
 
@@ -42,15 +43,17 @@ app.use(function(err, req, res, next) {
 
 app.io = io('', {
   cors: {
-      origin: ["localhost:3000"],
+      origin: ["http://localhost:3000"],
       methods:["GET","POST"]
   }
 });
 
-  
+
+// socket으로 
+// room 이름 받기
 app.io.on('connection', (socket)=>{
-  clients[socket.id] = socket.rooms
-  roomhandler(app, socket);
+  // room 목록 추가.
+  socketHandler(app, socket);
 })
 
 module.exports = app;

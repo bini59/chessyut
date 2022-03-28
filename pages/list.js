@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { useState, useEffect } from "react";
 
+import socketio from "socket.io-client";
+
 const style = `
 .Nav-container{
     background-color: #fff;
@@ -161,24 +163,6 @@ div.container{
     
 `
 
-const fetchRoom = (room, set)=>{
-    const recipeUrl = "http://192.168.1.21:3001/room";
-    const requestMetadata = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(room)
-    };
-        //rendering Main
-    fetch(recipeUrl, requestMetadata)
-    .then(res => res.json())
-    .then(json => set(JSON.parse(json)))
-
-}
-
-
 const Create = (props)=>{
 
     // 방 제목 결정해서 서버로 보내는 코드 필요
@@ -186,8 +170,9 @@ const Create = (props)=>{
     // 했음
     const createRoom = ()=>{
         var title = document.getElementById("roominput").value;
-        fetchRoom({title: title, np: 1},props.setRoom);
 
+        // socket으로 방 제목을 보내기
+        props.socket.emit("updateRoom", {title: title, np: 0});
         props.removeWindow();
     }
 
@@ -214,7 +199,29 @@ const List = ()=>{
     const [showCreate, setCreate] = useState(false)
     const [roomlist, setRoomlist] = useState([])
 
-    useEffect(()=>{fetchRoom({}, setRoomlist);}, [])
+    /*
+        임시로 만들어보는 코드
+        useEffect로 socket에 연결해보기
+
+
+    */
+    
+    const [socket, setSocket] = useState("")
+    // 소켓 연결
+    useEffect(()=>{
+        setSocket(socketio.connect("http://localhost:3002"))
+    }, [])
+    useEffect(()=>{
+        if(socket){
+            console.log(socket);
+            socket.on("updateRoom", (data)=>{
+                setRoomlist(data.room)
+            })
+        }
+    }, [socket]);
+    
+
+
 
     const navbar = (
         <div className="Nav-container">
@@ -222,8 +229,6 @@ const List = ()=>{
                 <div>
                     <Link href="/list"><a>Chess</a></Link>
                 </div>
-                
-
                 <div className="profile">nickname</div>
             </nav>
         </div>
@@ -248,7 +253,7 @@ const List = ()=>{
                     setRoomlist 삭제할것.
 
                  */}
-                {showCreate ? <Create room={roomlist} setRoom={(e)=>{setRoomlist(e)}}removeWindow={()=>{setCreate(false)}} /> : ""}
+                {showCreate ? <Create socket={socket} room={roomlist} removeWindow={()=>{setCreate(false)}} /> : ""}
                 <div className="create-btn-wrapper">
                     <button className="create-btn" onClick={()=>{setCreate(!showCreate)}}>방 생성하기</button>
                 </div>

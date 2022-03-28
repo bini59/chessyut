@@ -14,3 +14,5 @@
 (N) list.js:94 서버로 방정보 보내기. {cm:2022-03-17}
 (O) game.js:187 서버로 기물 이동정보 보내기
 (P) game.js:203 서버로 부터 방정보 갱신받기 {cm:2022-03-17}
+(Q) implement socket io  client - server connect 
+(R) implement socket io Rooms. connect indivisual rooms.
