@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "pm2 start ./bin/www --watch",
-    "log": "pm2 log"
+    "test" : "pm2 log"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
