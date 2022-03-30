@@ -38,7 +38,7 @@ table th{
 table td{
     border-bottom: 1px solid #dee2e6;
 }
-tbody tr:hover{
+tbody tr:hover, tr.full{
     background-color: #f1f1f1;
 }
 

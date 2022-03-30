@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 import socketio from "socket.io-client";
 
-import Style from "./style/list";
+import Style from "../style/list";
 
 const Create = (props)=>{
 
@@ -51,7 +51,7 @@ const List = ()=>{
     const [socket, setSocket] = useState("")
     // 소켓 연결
     useEffect(()=>{
-        setSocket(socketio.connect("http://localhost:3002"))
+        setSocket(socketio.connect("http://192.168.0.150:3002"))
     }, [])
     useEffect(()=>{
         if(socket){
@@ -76,14 +76,21 @@ const List = ()=>{
         </div>
     )
 
-
     const lists = roomlist.map((r, i)=>{
+        let href = {
+            pathname: '/game/[room]',
+            query: { room: r.title },
+            }
+
         return(
-            <Link href="/game" key={"room"+i}>
-                <tr><td>{i+1}</td><td>{r.title}</td><td>{r.np}/2</td></tr>
+            <Link href={(r.np < 2 ? href : "")} key={"room"+i}>
+                <tr className={(r.np < 2 ? "" : "full")}><td>{i+1}</td><td>{r.title}</td><td>{r.np}/2</td></tr>
             </Link>
         )
     })
+
+
+    
 
     return(
         <>

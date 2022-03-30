@@ -1,50 +1,6 @@
 import { useEffect, useState } from "react";
+
 import Image from "next/image";
-
-import Timer from "./component/timer";
-import Style from "./style/game"
-
-const User = ()=>{
-    return (
-        <section className="user-section">
-            <div className="user-info" id="usr-me">
-                <img className="usr-image" />
-                <div className="usr-data">
-                    <div className="usr-1 usr-data-text">
-                        <span className="lvl" style={{"marginRight":"10px"}}>Lv.0</span>
-                        <span className="usr-name">me</span>
-                    </div>
-                    <div className="usr-2 usr-data-text">
-                        <span className="usr-rating">Rating : 1000</span>
-                    </div>
-                    <div className="usr-3 usr-data-text">
-                        <span className="usr-win" style={{"marginRight":"10px"}}>승 : 0</span>
-                        <span className="usr-lose">패 : 0</span>
-                    </div>
-                </div>
-
-            </div> 
-            <div className="user-info" id="usr-opp">
-                <img className="usr-image" />
-                <div className="usr-data">
-                    <div className="usr-1 usr-data-text">
-                        <span className="lvl" style={{"marginRight":"10px"}}>Lv.0</span>
-                        <span className="usr-name">opp</span>
-                    </div>
-                    <div className="usr-2 usr-data-text">
-                        <span className="usr-rating">Rating : 1000</span>
-                    </div>
-                    <div className="usr-3 usr-data-text">
-                        <span className="usr-win" style={{"marginRight":"10px"}}>승 : 0</span>
-                        <span className="usr-lose">패 : 0</span>
-                    </div>
-                </div>
-            </div> 
-        </section>
-    )
-}
-
-// (!(p%2)||(q%2))&&(!(q%2)||(p%2))
 
 const Board = (props)=>{
     const [B, setB] = useState([
@@ -61,9 +17,22 @@ const Board = (props)=>{
     //     console.log(props)
     // })
 
-
     const [target, setTarget] = useState("")
     const piecesInfo = props.picsInfo;
+    
+    const moveOpp = (loc, pics)=>{
+        console.log("nmoveopp 실행")
+        let info = {...piecesInfo};
+        for(var i = 0; i < 7; i++)
+            for(var j = 0; j < 8; j++)
+                if(info.pieces[i][j] == pics) info.pieces[i][j] = 0;
+
+        (loc[0] == 6 && loc[1] == 6) ? info.oppArrive.push(pics) : info.pieces[loc[0]][loc[1]] = pics;
+        if(info.oppNotArrive.indexOf(pics) != -1){
+            info.oppNotArrive.splice(info.oppNotArrive.indexOf(pics), 1);
+        }
+        props.setPics(info);
+    }
     const move = (loc)=>{
         let info = {...piecesInfo};
         for(var i = 0; i < 7; i++)
@@ -74,7 +43,11 @@ const Board = (props)=>{
         if(info.myNotArrive.indexOf(target) != -1){
             info.myNotArrive.splice(info.myNotArrive.indexOf(target), 1);
         }
-
+        props.socket.emit("updatePics", {
+            title : props.room,
+            target : target,
+            loc: loc
+        })
 
         // 이 부분은 서버로 보내서 처리할것. 
         // 서버로 보낸후 받아오는걸로 setPics..
@@ -90,8 +63,6 @@ const Board = (props)=>{
             return;
         }
         const dice = props.dice;
-
-        // console.log("주사위값 확인 : "+dice);
 
 
         if(loc[0] == loc[1]){loc[0] = loc[1] = (dice+loc[0] > 6 ? 6 : loc[0]+dice)}
@@ -115,7 +86,7 @@ const Board = (props)=>{
         setB(_b);
     }
 
-    let Board = B.map((R, ri)=>{
+    let board = B.map((R, ri)=>{
         let row = R.map((I, iI)=>{
             return(
                 <td 
@@ -134,6 +105,18 @@ const Board = (props)=>{
             <tr key={ri*100}>{row}</tr>
         )
     })
+
+    useEffect(()=>{
+        if(props.socket){
+            props.socket.off("updatePics")
+            props.socket.on("updatePics", data=>{
+                console.log("on으로 받았음")
+                let pics = "w"+data.target[1]+(data.target[2] ? data.target[2] : "");
+                setTarget(pics)
+                moveOpp(data.loc, pics);
+            })
+        }
+    }, [props.socket])
     
 
 
@@ -143,7 +126,7 @@ const Board = (props)=>{
             <Piece click={(target, loc)=>{Click("new", target, loc)}}dice={props.dice} piece={[piecesInfo.myNotArrive, piecesInfo.myArrive]}/>
             <section className="board">
                 <table className="chess-board">
-                    <tbody>{Board}</tbody>
+                    <tbody>{board}</tbody>
                 </table>
             </section>
             <Piece click={(target, loc)=>{Click("new", target, loc)}}dice={props.dice} piece={[piecesInfo.oppNotArrive, piecesInfo.oppArrive]}/>
@@ -152,31 +135,20 @@ const Board = (props)=>{
     );
 }
 
-const Dice = (props)=>{
-    // 서버로 보내야함.
-    // 주사위 결과값
-    return(
-        <section className="dice">
-            <div>주사위 결과 값 : {props.dice}</div>
-            <button onClick={()=>{props.setDice(Math.floor(Math.random()*4)+1);}}>주사위 굴리기</button>
-        </section>
-    )
-}
-
 const Piece = (props)=>{
     // console.log(props)
 
     const notArr = props.piece[0].map((p, i)=>{
         return(
             <div className="pieceWait" key={"mypice"+i}>
-                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}} src={"/pieces/"+p+".png"} layout="fill"style={{"width":"null", "height":"5vw","resizeMode":"cover"}} />
+                <Image className="piece" onClick={()=>{props.click(p, [7, 1])}} src={"/pieces/"+p+".png"} layout="fill" />
             </div>
         )
     });
     const Arr = props.piece[1].map((p, i)=>{
         return(
             <div className="pieceWait" key={"mypice"+i}>
-                <Image className="piece" src={"/pieces/"+p+".png"} width="50" height="50" />
+                <Image className="piece" src={"/pieces/"+p+".png"} layout="fill" />
             </div>
         )
     });
@@ -191,54 +163,5 @@ const Piece = (props)=>{
     )
 }
 
-const Game = ()=>{
-    const [time, setTime] = useState(0);
 
-    const [diceN, setDice] = useState(3)
-    const [pieceInfo, setPics] = useState({
-        myNotArrive : ["bK", "bB", "bN", "bP", "bP1"],
-        myArrive : [],
-        oppNotArrive : ["wK", "wB", "wN", "wP", "wP1"],
-        oppArrive : [],
-        pieces : [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    })
-
-
-    return (
-        <>
-            <Timer time={time} settime={(t)=>{setTime(t)}}/>
-            <User/>
-            
-            <Board picsInfo={pieceInfo} setPics={(e)=>setPics(e)} dice={diceN}/>
-
-            <Dice dice={diceN} setDice={(t)=>{setDice(t)}}/>
-            
-            {/* test timer button */}
-            {/* <button onClick={()=>{setTime(10)}}>tt</button>
-            <button onClick={()=>{setTime(5)}}>tt</button> */}
-
-            {/* <button onClick={()=>{setPics([
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, "bB", 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ])}}>12</button> */}
-
-            <style jsx>{Style}</style>
-        </>
-    );
-}
-
-
-export default Game
+export default Board

@@ -8,6 +8,8 @@ const io = require("socket.io")
 const roomRouter = require("./routes/room");
 const socketHandler = require("./routes/game");
 
+
+
 const app = express();
 
 app.use(cors());
@@ -43,7 +45,7 @@ app.use(function(err, req, res, next) {
 
 app.io = io('', {
   cors: {
-      origin: ["http://localhost:3000"],
+      origin: "*",
       methods:["GET","POST"]
   }
 });

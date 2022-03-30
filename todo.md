@@ -16,3 +16,4 @@
 (P) game.js:203 서버로 부터 방정보 갱신받기 {cm:2022-03-17}
 (Q) implement socket io  client - server connect 
 (R) implement socket io Rooms. connect indivisual rooms.
+(S) implement algorithm when user disconnected
