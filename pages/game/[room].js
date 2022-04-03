@@ -2,139 +2,106 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 import socketio from "socket.io-client";
+import create from "zustand"
+import {devtools} from "zustand/middleware"
 
 import Timer from "../../component/timer";
-import Board from "../../component/board";
+import Board from "../../component/game/board";
 import Style from "../../style/game"
-
-
-const User = ()=>{
-    return (
-        <section className="user-section">
-            <div className="user-info" id="usr-me">
-                <img className="usr-image" />
-                <div className="usr-data">
-                    <div className="usr-1 usr-data-text">
-                        <span className="lvl" style={{"marginRight":"10px"}}>Lv.0</span>
-                        <span className="usr-name">me</span>
-                    </div>
-                    <div className="usr-2 usr-data-text">
-                        <span className="usr-rating">Rating : 1000</span>
-                    </div>
-                    <div className="usr-3 usr-data-text">
-                        <span className="usr-win" style={{"marginRight":"10px"}}>승 : 0</span>
-                        <span className="usr-lose">패 : 0</span>
-                    </div>
-                </div>
-
-            </div> 
-            <div className="user-info" id="usr-opp">
-                <img className="usr-image" />
-                <div className="usr-data">
-                    <div className="usr-1 usr-data-text">
-                        <span className="lvl" style={{"marginRight":"10px"}}>Lv.0</span>
-                        <span className="usr-name">opp</span>
-                    </div>
-                    <div className="usr-2 usr-data-text">
-                        <span className="usr-rating">Rating : 1000</span>
-                    </div>
-                    <div className="usr-3 usr-data-text">
-                        <span className="usr-win" style={{"marginRight":"10px"}}>승 : 0</span>
-                        <span className="usr-lose">패 : 0</span>
-                    </div>
-                </div>
-            </div> 
-        </section>
-    )
-}
-
-// (!(p%2)||(q%2))&&(!(q%2)||(p%2))
-
-
+import User from "../../component/game/user";
 
 const Dice = (props)=>{
     // 서버로 보내야함.
     // 주사위 결과값
+    const {dice, change_dice} = props.store();
     return(
         <section className="dice">
-            <div>주사위 결과 값 : {props.dice}</div>
-            <button onClick={()=>{props.setDice(Math.floor(Math.random()*4)+1);}}>주사위 굴리기</button>
+            <div>주사위 결과 값 : {dice}</div>
+            <button onClick={()=>{change_dice(Math.floor(Math.random()*4)+1);}}>주사위 굴리기</button>
         </section>
     )
 }
+
+const useStore = create(devtools((set)=>({
+    pieceinfo : [
+        {name : "bK", location : [0]},
+        {name : "bB", location : [0]},
+        {name : "bN", location : [0]},
+        {name : "bP", location : [0]},
+        {name : "bP1", location : [0]},
+        {name : "wK", location : [0]},
+        {name : "wB", location : [0]},
+        {name : "wN", location : [0]},
+        {name : "wP", location : [0]},
+        {name : "wP1", location : [0]},
+    ],
+    change_pieceInfo(piece){
+        console.log("changed pieceinfo")
+        set((state)=>({pieceinfo : piece}))
+    },
+    dot : {
+        target : "",
+        location : []
+    },
+    change_dot(dot){
+        set((state)=>({dot : dot}))
+    },
+    dice : 1,
+    change_dice(dice){
+        set((state)=>({dice : dice}))
+    }
+})));
 
 
 
 const Game = ()=>{
     const [time, setTime] = useState(0);
+
+
+    // for join Room
+    // router, room Id value
     const router = useRouter();
     const { room } = router.query;
-
+    // Connect socket
     const [socket, setSocket] = useState("")
-    
     useEffect(()=>{
         setSocket(socketio.connect("http://192.168.0.150:3002"))
     }, [])
-
-
-    const [turn, _] = useState(Math.ceil(Math.random()*1000)) 
-    const [start, setStarter] = useState(true)
-
+    // join room
     useEffect(()=>{ 
         if(room && socket){
             console.log("방 입장")
-            socket.emit("joinRoom", {title:room, n : turn});
+            socket.emit("joinRoom", {title:room});
         }
     }, [socket])
 
 
-    //선공 후공
-    useEffect(()=>{
-        if(socket){
-            socket.off("setStarter")
-            socket.on("setStarter", data=>{
-                if(data.n != turn){
-                    setStarter(false);
-                }
-            })
-        }
-    }, [socket])
-
-
-    const [diceN, setDice] = useState(3)
-    const [pieceInfo, setPics] = useState({
-        myNotArrive : ["bK", "bB", "bN", "bP", "bP1"],
-        myArrive : [],
-        oppNotArrive : ["wK", "wB", "wN", "wP", "wP1"],
-        oppArrive : [],
-        pieces : [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ]
+    // 유저 데이터
+    const [me, setMe] = useState({
+        name : "me",
+        lvl : 1,
+        rating : 1000,
+        win_lose : [100, 100]
     })
-
-    const [diceOn, setStart] = useState(false)
+    const [opp, setOpp] = useState({
+        name : "opp",
+        lvl : 1,
+        rating : 1000,
+        win_lose : [101, 100]
+    })
 
     return (
         <>
             <Timer time={time} settime={(t)=>{setTime(t)}}/>
-            <User/>
-            
+            <section className="user-section">
+                <User user={me} me={"usr_me"}/>
+                <User user={opp} me={"usr_opp"}/>
+            </section>
             <Board 
+                store = {useStore}
                 socket={socket} 
-                room={room} 
-                picsInfo={pieceInfo} 
-                setPics={(e)=>setPics(e)} 
-                dice={diceN} 
-                starter={start}
-                start={e=>setStart(e)}
             />
-            {diceOn ? <Dice dice={diceN} setDice={(t)=>{setDice(t)}}/> : ""}
+            <Dice store={useStore}/>
 
             <style jsx>{Style}</style>
         </>
