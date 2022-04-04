@@ -20,11 +20,30 @@ const Dot = (props)=>{
     const {dot, pieceinfo, change_pieceInfo, change_dot, change_dice} = props.store()
     const Click = ()=>{
         let _dot = {...dot}
-        if(_dot.location[0] == 6 && _dot.location[1] == 6) _dot.location = [1]
+        let loc = [..._dot.location]
+        if(props.knight > 0){
+            loc = loc[props.knight-1];
+        }
+        if(loc[0] == 6 && loc[1] == 6) {
+            loc = [1]
+            if(_dot.target[0][1] == "K"){
+                props.setKing(true)
+            }
+        }
         let _pieceinfo = [...pieceinfo]
         for(var i = 0; i < 10; i++){
-            if(_dot.target == _pieceinfo[i].name){
-                _pieceinfo[i].location = _dot.location;
+            for(var j = 0; j < _dot.target.length; j++){
+                if(_dot.target[j] == _pieceinfo[i].name){
+                    _pieceinfo[i].location = loc;
+                    break;
+                }
+            }
+        }
+        for(var i = 0; i < 10; i++){
+            if((pieceinfo[i].location[0] == dot.location[0])&&(pieceinfo[i].location[1] == dot.location[1])){
+                if(i > 5){
+                    _pieceinfo[i].location = [0];
+                }
             }
         }
         _dot.target = ""
@@ -34,8 +53,25 @@ const Dot = (props)=>{
         change_dice(-2)
     }
 
+    const dotpng = ()=>{
+        let img = "/dot.png"
+        for(var i = 0; i < 10; i++){
+            if((pieceinfo[i].location[0] == dot.location[0])&&(pieceinfo[i].location[1] == dot.location[1])){
+                if(i > 5){
+                    img = "/kill.png"
+                }
+                else{
+                    img = "/combine.png"
+                }
+            }
+        }
+
+        return img
+    }
+
+
     return (
-        <Image onClick={()=>{Click()}} className="dot" src={"/dot.svg"} width="20" height="20" />
+        <Image onClick={()=>{Click()}} className="dot" src={dotpng()} layout="fill" />
     )
 }
 

@@ -24,16 +24,16 @@ const Dice = (props)=>{
 
 const useStore = create(devtools((set)=>({
     pieceinfo : [
-        {name : "bK", location : [0]},
-        {name : "bB", location : [0]},
-        {name : "bN", location : [0]},
-        {name : "bP", location : [0]},
-        {name : "bP1", location : [0]},
-        {name : "wK", location : [0]},
-        {name : "wB", location : [0]},
-        {name : "wN", location : [0]},
-        {name : "wP", location : [0]},
-        {name : "wP1", location : [0]},
+        {name : ["bK"], location : [0]},
+        {name : ["bR"], location : [0]},
+        {name : ["bN"], location : [0]},
+        {name : ["bP"], location : [0]},
+        {name : ["bP1"], location : [0]},
+        {name : ["wK"], location : [0]},
+        {name : ["wR"], location : [0]},
+        {name : ["wN"], location : [4, 1]},
+        {name : ["wP"], location : [0]},
+        {name : ["wP1"], location : [0]},
     ],
     change_pieceInfo(piece){
         console.log("changed pieceinfo")

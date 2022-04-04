@@ -3,7 +3,8 @@ import Dot from "./dot";
 
 const Plate = (props)=>{
     // props : {
-    //     store
+    //     store : zustand
+    //     setKing : function()
     // }
     // store : {
     //     pieceinfo : Obejct Array[],
@@ -33,16 +34,29 @@ const Plate = (props)=>{
         let row = R.map((I, iI)=>{
             // piece있으면 정해주기
             var content = [];
+            let name = []
             for(var i = 0; i < 10; i++){
                 if(pieceinfo[i].location.length != 1){
                     if(ri == pieceinfo[i].location[0] && iI == pieceinfo[i].location[1]){
-                        content.push(<Piece key={"Piece"+ri+iI} name={pieceinfo[i].name} store={props.store}/>)
+                        name.push(pieceinfo[i].name[0])
                     }
                 }
             }
+            if(name.length > 0)
+                content.push(<Piece key={"Piece"+ri+iI} name={name} store={props.store} setKing={props.setKing}/>)
             if(dot.location.length == 2){
-                if(ri == dot.location[0] && iI == dot.location[1]){
-                    content.push(<Dot key={"dot"+ri+iI} store={props.store}/>)
+                if(typeof(dot.location[0]) == "object"){
+                    if(ri == dot.location[0][0] && iI == dot.location[0][1]){
+                        content.push(<Dot key={"dot"+ri+iI} store={props.store} knight={1} setKing={props.setKing}/>)
+                    }
+                    if(ri == dot.location[1][0] && iI == dot.location[1][1]){
+                        content.push(<Dot key={"dot"+ri+iI} store={props.store} knight={2} setKing={props.setKing}/>)
+                    }
+                }
+                else{
+                    if(ri == dot.location[0] && iI == dot.location[1]){
+                        content.push(<Dot key={"dot"+ri+iI} store={props.store} knight={0} setKing={props.setKing}/>)
+                    }
                 }
             }
             return(

@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useState } from "react";
 
 
 import PieceRoom from "./board/pieceRoom";
 import Plate from "./board/plate";
+import ArriveKing from "./board/kingArrive";
 const Board = (props)=>{
     // 콘솔 출력용
     // useEffect(()=>{
@@ -40,15 +41,17 @@ const Board = (props)=>{
     //     }
     // }, [props.socket])
     
-
+    const [ifKingArrive, setKing] = useState(false)
 
     return (
-
+        <>
+        {ifKingArrive ? <ArriveKing store={props.store} setKing={setKing}/> : ""}
         <div className="Game">
             <PieceRoom camp={"me"} store={props.store} />
-            <Plate store={props.store} />
+            <Plate store={props.store} setKing={setKing}/>
             <PieceRoom camp={"opp"} store={props.store} />
         </div>
+        </>
         
     );
 }
