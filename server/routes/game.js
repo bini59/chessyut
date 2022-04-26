@@ -24,25 +24,10 @@ const connect = (app, socket)=>{
         }
         users[socket.id] = socket.rooms
         app.io.emit("updateRoom", rooms)
-        app.io.in(data.title).emit("setStarter", {n :data.n});
-    })
-    socket.on("updatePics", data=>{
-        console.log(data)
-        app.io.in(data.title).emit("updatePics", data);
-    })
-    // socket.on("disconnect", (data)=>{
-    //     console.log(users);
-    //     console.log(socket.id)
-    //     let title = Array.from(users[socket.id].keys())[1]
-    //     let idx = rooms.room.findIndex(i => i.title === title);
-        
-    //     rooms.room[idx].np -= 1
-    //     if(rooms.room[idx].np == 0){
-    //         rooms.room.splice(idx, 1);
-    //     }
+        app.io.in(data.title).emit("newPlayer", data.user)
 
-    //     app.io.emit("updateRoom", rooms);
-    // })
+    })
+
 }
 
 

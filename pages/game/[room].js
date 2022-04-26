@@ -52,10 +52,33 @@ const useStore = create(devtools((set)=>({
     }
 })));
 
+const userStore = create(devtools((set)=>({
+    me : {
+        name : "",
+        win_lose : [100, 100],
+        rating : 1000,
+        lvl : 1,
+        profile_img : "",
+        pieceColor : ["b", "w"]
+    },
+    opp : {
+        name : "",
+        win_lose : [100, 100],
+        rating : 1000,
+        lvl : 1,
+        profile_img : "",
+        pieceColor : ["b", "w"]
+    }   
+})));
+
 
 
 const Game = ()=>{
     const [time, setTime] = useState(0);
+
+
+    // user info from zustand
+    const {me, opp} = userStore();
 
 
     // for join Room
@@ -71,24 +94,22 @@ const Game = ()=>{
     useEffect(()=>{ 
         if(room && socket){
             console.log("방 입장")
-            socket.emit("joinRoom", {title:room});
+            socket.emit("joinRoom", {title:room, user:me});
         }
     }, [socket])
 
+    // 상대방이 들어오면 상대방 정보 갱신
+    useEffect(()=>{
+        if(socket){
+            socket.off("newPlayer");
+            socket.on("newPlayer", (data)=>{
+                if(data.name != me.name){
+                    setOpp(data);
+                }
+            });
+        }
+    },[socket])
 
-    // 유저 데이터
-    const [me, setMe] = useState({
-        name : "me",
-        lvl : 1,
-        rating : 1000,
-        win_lose : [100, 100]
-    })
-    const [opp, setOpp] = useState({
-        name : "opp",
-        lvl : 1,
-        rating : 1000,
-        win_lose : [101, 100]
-    })
 
     return (
         <>

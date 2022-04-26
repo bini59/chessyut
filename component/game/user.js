@@ -10,6 +10,7 @@ const User_info = (props)=>{
     const checkMe = props.me;
     const user = props.user
 
+
     return (
         <div className="user-info" id={checkMe}>
             <img className="usr-image" />
